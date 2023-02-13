@@ -7,7 +7,6 @@ import FindCountry from "./components/FindCountry"
 function App() {
   const [countries, setCountries] = useState([])
   const [country, setCountry] = useState("")
-  const [city, setCity] = useState(null)
 
   useEffect(() => {
     countryService
@@ -23,13 +22,10 @@ function App() {
     setCountry(event.target.value)
   }
 
-  const handleCityChange = (event) => {
-    setCity(event.target.value)
-  }
   return (
     <div>
       <FindCountry country={country} handleCountryChange={handleCountryChange} />
-      <Countries countries={countriesToShow} setCountry={setCountry} city={city} handleCityChange={handleCityChange} />
+      <Countries countries={countriesToShow} setCountry={setCountry} />
     </div >
   );
 }
