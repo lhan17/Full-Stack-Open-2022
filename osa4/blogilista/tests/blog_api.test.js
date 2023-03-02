@@ -22,29 +22,89 @@ const initialList = [
         __v: 0,
     },
 ]
-
-const api = supertest(app)
-
 beforeEach(async () => {
     await Blog.deleteMany({})
-    console.log(1, Blog)
     const blog1 = new Blog(initialList[0])
     const blog2 = new Blog(initialList[1])
     await blog1.save()
     await blog2.save()
 })
 
-test('blogs as json', async () => {
-    await api
-        .get('/api/blogs')
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
+const api = supertest(app)
+describe('Initial tests', () => {
+    test('blogs as json', async () => {
+        await api
+            .get('/api/blogs')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+    })
+
+    test('there are two blogs', async () => {
+        const response = await api.get('/api/blogs')
+
+        expect(response.body).toHaveLength(2)
+    })
 })
 
-test('there are two blogs', async () => {
-    const response = await api.get('/api/blogs')
+describe('new blogs and defined ids', () => {
+    test('ids of the blogs are defined', async () => {
+        const response = await api.get('/api/blogs')
+        expect(response._id).toBeDefined
+    })
 
-    expect(response.body).toHaveLength(2)
+    test('adding new blogs to the list', async () => {
+        const newBlog = {
+            title: 'How water is a power',
+            author: 'Thinh Lam',
+            url: 'http://www.notarealurl.com',
+            likes: 5,
+        }
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+        const response = await api.get('/api/blogs')
+        expect(response.body).toHaveLength(initialList.length + 1)
+    })
+})
+
+describe('adding without a specific variable', () => {
+    test('adding a blog without likes variable', async () => {
+        const newBlog = {
+            title: 'How water is a power',
+            author: 'Thinh Lam',
+            url: 'http://www.notarealurl.com',
+        }
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+        const response = await api.get('/api/blogs')
+        console.log(response.body[response.body.length - 1])
+        expect(response.body[response.body.length - 1].likes).toBe(0)
+    })
+
+    test('adding a blog without title', async () => {
+        const newBlog = {
+            author: 'Thinh Lam',
+            url: 'http://www.notarealurl.com',
+        }
+        await api.post('/api/blogs').send(newBlog).expect(400)
+    })
+
+    test('adding a blog without url', async () => {
+        const newBlog = {
+            title: 'How water is a power',
+            author: 'Thinh Lam',
+        }
+        await api.post('/api/blogs').send(newBlog).expect(400)
+    })
+})
+
+describe('Delete and put tests', () => {
+    test('Delete tests', async () => {})
 })
 
 afterAll(async () => {
