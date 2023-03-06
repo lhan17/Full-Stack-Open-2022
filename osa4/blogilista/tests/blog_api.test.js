@@ -104,7 +104,30 @@ describe('adding without a specific variable', () => {
 })
 
 describe('Delete and put tests', () => {
-    test('Delete tests', async () => {})
+    test('Delete test', async () => {
+        //The blog to delete
+        const firstBlog = initialList[0]
+        await api.delete(`/api/blogs/${firstBlog._id}`).expect(204)
+        const blogListAfter = await api.get('/api/blogs')
+        expect(blogListAfter.body).toHaveLength(initialList.length - 1)
+        const title = blogListAfter.body.map((n) => n.title)
+        expect(title).not.toContain(firstBlog.title)
+    })
+
+    test('Put test', async () => {
+        const updated = {
+            _id: '5a422aa71b54a676234d17f8',
+            title: 'Magical Warrior',
+            author: 'Thinh Lam',
+            url: 'www.notarealurl.com',
+            likes: 23,
+        }
+
+        await api.put(`/api/blogs/${updated._id}`).send(updated).expect(204)
+        const blogListAfter = await api.get('/api/blogs')
+        const title = blogListAfter.body.map((n) => n.title)
+        expect(title).toContain(updated.title)
+    })
 })
 
 afterAll(async () => {
