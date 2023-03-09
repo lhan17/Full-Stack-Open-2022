@@ -11,6 +11,7 @@ const initialList = [
         author: 'Edsger W. Dijkstra',
         url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
         likes: 51,
+        user: '640994f2263c644cae8225f2',
         __v: 0,
     },
     {
@@ -19,6 +20,7 @@ const initialList = [
         author: 'Edsger W. Dijkstra',
         url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
         likes: 52,
+        user: '640994f2263c644cae8225f2',
         __v: 0,
     },
 ]
@@ -61,6 +63,10 @@ describe('new blogs and defined ids', () => {
         }
         await api
             .post('/api/blogs')
+            .set(
+                'Authorization',
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRoaW5oIiwiaWQiOiI2NDA5OTRmMjI2M2M2NDRjYWU4MjI1ZjIiLCJpYXQiOjE2NzgzNDk1NzN9.9t87kkJY9ufAbKuJoVv3Ow9mOhpudFU62wOJUusYNuA'
+            )
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -78,6 +84,10 @@ describe('adding without a specific variable', () => {
         }
         await api
             .post('/api/blogs')
+            .set(
+                'Authorization',
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRoaW5oIiwiaWQiOiI2NDA5OTRmMjI2M2M2NDRjYWU4MjI1ZjIiLCJpYXQiOjE2NzgzNDk1NzN9.9t87kkJY9ufAbKuJoVv3Ow9mOhpudFU62wOJUusYNuA'
+            )
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -91,7 +101,14 @@ describe('adding without a specific variable', () => {
             author: 'Thinh Lam',
             url: 'http://www.notarealurl.com',
         }
-        await api.post('/api/blogs').send(newBlog).expect(400)
+        await api
+            .post('/api/blogs')
+            .set(
+                'Authorization',
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRoaW5oIiwiaWQiOiI2NDA5OTRmMjI2M2M2NDRjYWU4MjI1ZjIiLCJpYXQiOjE2NzgzNDk1NzN9.9t87kkJY9ufAbKuJoVv3Ow9mOhpudFU62wOJUusYNuA'
+            )
+            .send(newBlog)
+            .expect(400)
     })
 
     test('adding a blog without url', async () => {
@@ -99,7 +116,14 @@ describe('adding without a specific variable', () => {
             title: 'How water is a power',
             author: 'Thinh Lam',
         }
-        await api.post('/api/blogs').send(newBlog).expect(400)
+        await api
+            .post('/api/blogs')
+            .set(
+                'Authorization',
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRoaW5oIiwiaWQiOiI2NDA5OTRmMjI2M2M2NDRjYWU4MjI1ZjIiLCJpYXQiOjE2NzgzNDk1NzN9.9t87kkJY9ufAbKuJoVv3Ow9mOhpudFU62wOJUusYNuA'
+            )
+            .send(newBlog)
+            .expect(400)
     })
 })
 
@@ -107,7 +131,14 @@ describe('Delete and put tests', () => {
     test('Delete test', async () => {
         //The blog to delete
         const firstBlog = initialList[0]
-        await api.delete(`/api/blogs/${firstBlog._id}`).expect(204)
+        console.log(firstBlog._id)
+        await api
+            .delete(`/api/blogs/${firstBlog._id}`)
+            .set(
+                'Authorization',
+                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRoaW5oIiwiaWQiOiI2NDA5OTRmMjI2M2M2NDRjYWU4MjI1ZjIiLCJpYXQiOjE2NzgzNDk1NzN9.9t87kkJY9ufAbKuJoVv3Ow9mOhpudFU62wOJUusYNuA'
+            )
+            .expect(204)
         const blogListAfter = await api.get('/api/blogs')
         expect(blogListAfter.body).toHaveLength(initialList.length - 1)
         const title = blogListAfter.body.map((n) => n.title)
@@ -127,6 +158,20 @@ describe('Delete and put tests', () => {
         const blogListAfter = await api.get('/api/blogs')
         const title = blogListAfter.body.map((n) => n.title)
         expect(title).toContain(updated.title)
+    })
+
+    test('Wrong person posting', async () => {
+        const newBlog = {
+            title: 'How water is a power',
+            author: 'Thinh Lam',
+            url: 'http://www.notarealurl.com',
+            likes: 5,
+        }
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
     })
 })
 
