@@ -59,7 +59,8 @@ blogRouter.put('/:id', async (request, response) => {
         title: request.body.title,
         author: request.body.author,
         url: request.body.url,
-        likes: request.likes,
+        likes: request.body.likes,
+        user: request.body.user.id,
     })
     response.status(204).end()
 })

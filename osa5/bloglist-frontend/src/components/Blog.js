@@ -1,6 +1,26 @@
 import { useState } from 'react'
 
-const Blog = ({ blog }) => {
+const BlogContent = ({ blog, handlikes, handleRemove, user }) => {
+    return (
+        <div>
+            <div>{blog.url}</div>
+            <div>
+                {blog.likes}
+                <button onClick={handlikes} className='likebutton'>
+                    like
+                </button>
+            </div>
+            <div>{blog.user.name}</div>
+            <div>
+                {user.id === blog.user.id && (
+                    <button onClick={handleRemove}>remove</button>
+                )}
+            </div>
+        </div>
+    )
+}
+
+const Blog = ({ blog, handleLike, handleDelete, user }) => {
     const blogStyle = {
         paddingTop: 10,
         paddingLeft: 2,
@@ -23,21 +43,28 @@ const Blog = ({ blog }) => {
         handleView(blog.id)
     }
 
+    const handlikes = () => {
+        handleLike(blog.id)
+    }
+
+    const handleRemove = () => {
+        handleDelete(blog)
+    }
+
     return (
-        <div style={blogStyle}>
-            <div>
-                {blog.title} {blog.author}
-                <button onClick={handleClick}>
-                    {view.includes(blog.id) ? 'hide' : 'view'}
-                </button>
-                {view.includes(blog.id) && (
-                    <div>
-                        <div>{blog.url}</div>
-                        <div>{blog.likes}</div>
-                        <div>{blog.user.name}</div>
-                    </div>
-                )}
-            </div>
+        <div style={blogStyle} className='blog'>
+            {blog.title} {blog.author}
+            <button onClick={handleClick}>
+                {view.includes(blog.id) ? 'hide' : 'view'}
+            </button>
+            {view.includes(blog.id) && (
+                <BlogContent
+                    blog={blog}
+                    handlikes={handlikes}
+                    handleRemove={handleRemove}
+                    user={user}
+                />
+            )}
         </div>
     )
 }

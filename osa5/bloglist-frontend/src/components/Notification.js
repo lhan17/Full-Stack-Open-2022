@@ -7,6 +7,6 @@ const Notification = ({ message, positive }) => {
         return <div className='error'>{message}</div>
     }
 
-    return <div className='blog'>{message}</div>
+    return <div className='blogs'>{message}</div>
 }
 export default Notification

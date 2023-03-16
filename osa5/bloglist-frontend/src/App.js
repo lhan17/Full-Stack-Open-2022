@@ -13,18 +13,18 @@ const App = () => {
     const [password, setPassword] = useState('')
     const [user, setUser] = useState(null)
 
-    //new blog usestates
-    const [title, setTitle] = useState('')
-    const [author, setAuthor] = useState('')
-    const [url, setUrl] = useState('')
-
     const [errorMessage, setErrorMessage] = useState(null)
     const [positive, setPositive] = useState(true)
 
     const blogFormRef = useRef()
 
     useEffect(() => {
-        blogService.getAll().then((blogs) => setBlogs(blogs))
+        const fetchdata = async () => {
+            let blogs = await blogService.getAll()
+            blogs = blogs.sort((a, b) => b.likes - a.likes)
+            setBlogs(blogs)
+        }
+        fetchdata()
     }, [errorMessage])
 
     useEffect(() => {
@@ -65,20 +65,37 @@ const App = () => {
         }
     }
 
-    const handleCreate = async (blog) => {
-        try {
-            blogFormRef.current.toggleVisibility()
-            await blogService.create(blog)
-            setErrorMessage(`a new blog ${blog.title} by ${blog.author} added`)
-            setPositive(true)
+    const handleNewBlog = async (blog) => {
+        blogFormRef.current.toggleVisibility()
+        await blogService.create(blog)
+        setErrorMessage(`a new blog ${blog.title} by ${blog.author} added`)
+        setPositive(true)
+        setTimeout(() => {
+            setErrorMessage(null)
+        }, 5000)
+    }
+
+    const handleLike = async (id) => {
+        let blog = blogs.find((element) => element.id === id)
+        blog.likes++
+        console.log(blog)
+        await blogService.update(blog)
+        setErrorMessage(`blog ${blog.title} by ${blog.author} liked`)
+        setPositive(true)
+        setTimeout(() => {
+            setErrorMessage(null)
+        }, 5000)
+    }
+
+    const handleDelete = async (blog) => {
+        if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+            await blogService.deleteblog(blog.id)
+            setPositive(false)
+            setErrorMessage(`blog ${blog.title} deleted`)
+
             setTimeout(() => {
                 setErrorMessage(null)
             }, 5000)
-            setTitle('')
-            setAuthor('')
-            setUrl('')
-        } catch (exception) {
-            console.error(exception)
         }
     }
 
@@ -94,6 +111,7 @@ const App = () => {
                             type='text'
                             value={username}
                             name='Username'
+                            id='loginUsername'
                             onChange={({ target }) => setUsername(target.value)}
                         />
                     </div>
@@ -103,10 +121,13 @@ const App = () => {
                             type='password'
                             value={password}
                             name='Password'
+                            id='loginPassword'
                             onChange={({ target }) => setPassword(target.value)}
                         />
                     </div>
-                    <button type='submit'>login</button>
+                    <button id='loginButton' type='submit'>
+                        login
+                    </button>
                 </form>
             </div>
         )
@@ -118,23 +139,23 @@ const App = () => {
             <h2>blogs</h2>
             <div>
                 {user.name} logged in
-                <button onClick={handleLogout}>logout</button>
+                <button onClick={handleLogout} id='create'>
+                    logout
+                </button>
             </div>
             <div></div>
             <Togglable buttonLabel={'create'} ref={blogFormRef}>
-                <CreateForm
-                    handleCreate={handleCreate}
-                    title={title}
-                    author={author}
-                    url={url}
-                    handleTitleChange={({ target }) => setTitle(target.value)}
-                    handleAuthorChange={({ target }) => setAuthor(target.value)}
-                    handleUrlChange={({ target }) => setUrl(target.value)}
-                />
+                <CreateForm handleNewBlog={handleNewBlog} />
             </Togglable>
 
             {blogs.map((blog) => (
-                <Blog key={blog.id} blog={blog} />
+                <Blog
+                    key={blog.id}
+                    blog={blog}
+                    handleLike={handleLike}
+                    handleDelete={handleDelete}
+                    user={user}
+                />
             ))}
         </div>
     )

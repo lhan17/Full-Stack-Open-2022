@@ -1,9 +1,21 @@
 import { useState } from 'react'
-const CreateForm = ({ handleCreate }) => {
+
+const CreateForm = ({ handleNewBlog }) => {
     //new blog usestates
     const [title, setTitle] = useState('')
     const [author, setAuthor] = useState('')
     const [url, setUrl] = useState('')
+
+    const handleCreate = (blog) => {
+        try {
+            handleNewBlog(blog)
+            setTitle('')
+            setAuthor('')
+            setUrl('')
+        } catch (exception) {
+            console.error(exception)
+        }
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault()
@@ -23,6 +35,7 @@ const CreateForm = ({ handleCreate }) => {
                         value={title}
                         name='Title'
                         onChange={({ target }) => setTitle(target.value)}
+                        id='title-input'
                     />
                 </div>
                 <div>
@@ -31,6 +44,7 @@ const CreateForm = ({ handleCreate }) => {
                         value={author}
                         name='Author'
                         onChange={({ target }) => setAuthor(target.value)}
+                        id='author-input'
                     />
                 </div>
                 <div>
@@ -39,9 +53,12 @@ const CreateForm = ({ handleCreate }) => {
                         value={url}
                         name='Url'
                         onChange={({ target }) => setUrl(target.value)}
+                        id='url-input'
                     />
                 </div>
-                <button type='submit'>create</button>
+                <button type='submit' id='createButton'>
+                    create
+                </button>
             </form>
         </div>
     )

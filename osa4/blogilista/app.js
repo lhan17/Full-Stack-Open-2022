@@ -7,6 +7,10 @@ const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const loginRouter = require('./controllers/login')
+
+const testingRouter = require('./controllers/testing')
+app.use('/api/testing', testingRouter)
+
 const middleware = require('./middleware/middleware')
 mongoose.set('strictQuery', false)
 logger.info('connecting to', config.MONGODB_URI)
