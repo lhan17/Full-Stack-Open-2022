@@ -24,16 +24,6 @@ const AnecdoteForm = () => {
         const content = event.target.anecdote.value
         event.target.anecdote.value = ''
 
-        if (content.length < 5) {
-            let type = 'SMALL'
-            dispatch({ type })
-            setTimeout(() => {
-                type = 'NULL'
-                dispatch({ type })
-            }, 5000)
-            return
-        }
-
         newAnecdoteMutation.mutate({ content, votes: 0 })
         let type = 'ADD'
         const payload = content
