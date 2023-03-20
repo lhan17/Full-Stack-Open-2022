@@ -1,0 +1,34 @@
+{
+  "anecdotes": [
+    {
+      "content": "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
+      "id": "36975",
+      "votes": 8
+    },
+    {
+      "content": "Premature optimization is the root of all evil.",
+      "id": "25170",
+      "votes": 3
+    },
+    {
+      "content": "Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.",
+      "id": "98312",
+      "votes": 3
+    },
+    {
+      "content": "Smallest things can be the biggest things.",
+      "votes": 3,
+      "id": "ayFk99t"
+    },
+    {
+      "content": "Smallest things can be the biggest things.",
+      "votes": 0,
+      "id": "8DYFras"
+    },
+    {
+      "content": "Smallest things can be the biggest things.",
+      "votes": 0,
+      "id": "QFmdoM9"
+    }
+  ]
+}
