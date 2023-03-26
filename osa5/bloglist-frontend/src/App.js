@@ -1,44 +1,73 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
-import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
-import CreateForm from './components/CreateForm'
-import Togglable from './components/Togglable'
 import './index.css'
+import { useSelector, useDispatch } from 'react-redux'
+import { setNotification } from './reducers/notificationReducer.js'
+import {
+    addBlog,
+    deleteBlog,
+    initializeBlogs,
+    likeBlog,
+} from './reducers/blogReducer'
+import { setUser, userLogin } from './reducers/userReducer'
+import { Route, Routes, Link, useMatch, useParams } from 'react-router-dom'
+import { initializeUsers } from './reducers/usersReducer'
+import { AppBar, Button, Container, createTheme, Toolbar } from '@mui/material'
+
+import Blogs from './components/Blogs'
+import BlogView from './components/BlogView'
+import Person from './components/Person'
+import Users from './components/Users'
 
 const App = () => {
-    const [blogs, setBlogs] = useState([])
+    const padding = {
+        paddingRight: 5,
+    }
+
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [user, setUser] = useState(null)
+    //const [user, setUser] = useState(null)
 
-    const [errorMessage, setErrorMessage] = useState(null)
-    const [positive, setPositive] = useState(true)
+    const dispatch = useDispatch()
+    const notification = useSelector((state) => state.notification)
 
     const blogFormRef = useRef()
+    const user = useSelector((state) => state.user)
+
+    const blogsr = useSelector((state) => state.blog)
 
     useEffect(() => {
-        const fetchdata = async () => {
-            let blogs = await blogService.getAll()
-            blogs = blogs.sort((a, b) => b.likes - a.likes)
-            setBlogs(blogs)
-        }
-        fetchdata()
-    }, [errorMessage])
+        dispatch(initializeBlogs())
+    }, [notification])
 
     useEffect(() => {
         const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
         if (loggedUserJSON) {
             const user = JSON.parse(loggedUserJSON)
-            setUser(user)
-            blogService.setToken(user.token)
+            dispatch(userLogin(user))
         }
     }, [])
 
+    const data = useSelector((state) => state.users)
+
+    useEffect(() => {
+        dispatch(initializeUsers())
+    }, [])
+    // for the person link
+    const match = useMatch('/users/:id')
+    const person = match ? data.find((p) => p.id === match.params.id) : null
+
+    // for blogs link
+    const matchBlog = useMatch('/blogs/:id')
+    const blog = matchBlog
+        ? blogsr.find((p) => p.id === matchBlog.params.id)
+        : null
+
     const handleLogout = () => {
         window.localStorage.clear()
-        setUser(null)
+        dispatch(setUser(null))
     }
 
     const handleLogin = async (event) => {
@@ -48,61 +77,66 @@ const App = () => {
                 username,
                 password,
             })
-            blogService.setToken(user.token)
+            dispatch(userLogin(user))
             window.localStorage.setItem(
                 'loggedBlogAppUser',
                 JSON.stringify(user)
             )
-            setUser(user)
             setUsername('')
             setPassword('')
         } catch (exception) {
-            setErrorMessage(`wrong username or password`)
-            setPositive(false)
-            setTimeout(() => {
-                setErrorMessage(null)
-            }, 5000)
+            dispatch(
+                setNotification({
+                    content: `wrong username or password`,
+                    positive: false,
+                })
+            )
         }
     }
 
     const handleNewBlog = async (blog) => {
         blogFormRef.current.toggleVisibility()
-        await blogService.create(blog)
-        setErrorMessage(`a new blog ${blog.title} by ${blog.author} added`)
-        setPositive(true)
-        setTimeout(() => {
-            setErrorMessage(null)
-        }, 5000)
+        dispatch(addBlog(blog))
+        dispatch(
+            setNotification({
+                content: `a new blog ${blog.title} by ${blog.author} added`,
+                positive: true,
+            })
+        )
     }
 
     const handleLike = async (id) => {
-        let blog = blogs.find((element) => element.id === id)
-        blog.likes++
+        console.log(blogsr)
+        let blog = blogsr.find((element) => element.id === id)
         console.log(blog)
-        await blogService.update(blog)
-        setErrorMessage(`blog ${blog.title} by ${blog.author} liked`)
-        setPositive(true)
-        setTimeout(() => {
-            setErrorMessage(null)
-        }, 5000)
+        dispatch(likeBlog(blog))
+        dispatch(
+            setNotification({
+                content: `blog ${blog.title} by ${blog.author} liked`,
+                positive: true,
+            })
+        )
     }
 
     const handleDelete = async (blog) => {
         if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-            await blogService.deleteblog(blog.id)
-            setPositive(false)
-            setErrorMessage(`blog ${blog.title} deleted`)
-
-            setTimeout(() => {
-                setErrorMessage(null)
-            }, 5000)
+            dispatch(deleteBlog(blog))
+            dispatch(
+                setNotification({
+                    content: `blog ${blog.title} deleted`,
+                    positive: false,
+                })
+            )
         }
     }
 
     if (user === null) {
         return (
             <div>
-                <Notification message={errorMessage} positive={positive} />
+                <Notification
+                    message={notification.content}
+                    positive={notification.positive}
+                />
                 <h2>Log in to application</h2>
                 <form onSubmit={handleLogin}>
                     <div>
@@ -133,30 +167,81 @@ const App = () => {
         )
     }
 
+    const theme = createTheme({
+        palette: {
+            primary: {
+                main: '#229954',
+            },
+            secondary: {
+                main: '#85929E',
+            },
+        },
+    })
+
     return (
         <div>
-            <Notification message={errorMessage} positive={positive} />
-            <h2>blogs</h2>
-            <div>
-                {user.name} logged in
-                <button onClick={handleLogout} id='create'>
-                    logout
-                </button>
-            </div>
-            <div></div>
-            <Togglable buttonLabel={'create'} ref={blogFormRef}>
-                <CreateForm handleNewBlog={handleNewBlog} />
-            </Togglable>
-
-            {blogs.map((blog) => (
-                <Blog
-                    key={blog.id}
-                    blog={blog}
-                    handleLike={handleLike}
-                    handleDelete={handleDelete}
-                    user={user}
+            <Container>
+                <AppBar position='static' theme={theme}>
+                    <Toolbar disableGutters>
+                        <div>
+                            <Button color='inherit'>
+                                <Link style={padding} to='/'>
+                                    blogs
+                                </Link>
+                            </Button>
+                            <Button color='inherit'>
+                                <Link style={padding} to='/users'>
+                                    users
+                                </Link>
+                            </Button>
+                            {user.name} logged in
+                            <button onClick={handleLogout} id='create'>
+                                logout
+                            </button>
+                        </div>
+                    </Toolbar>
+                </AppBar>
+                <Notification
+                    message={notification.content}
+                    positive={notification.positive}
                 />
-            ))}
+                <h2>Blogs app</h2>
+
+                <Routes>
+                    <Route
+                        path='/users'
+                        element={<Users users={data} />}
+                    ></Route>
+                    <Route
+                        path='/'
+                        element={
+                            <Blogs
+                                blogs={blogsr}
+                                handleLike={handleLike}
+                                handleDelete={handleDelete}
+                                user={user}
+                                blogFormRef={blogFormRef}
+                                handleNewBlog={handleNewBlog}
+                            />
+                        }
+                    ></Route>
+                    <Route
+                        path='/users/:id'
+                        element={<Person person={person} />}
+                    ></Route>
+                    <Route
+                        path='/blogs/:id'
+                        element={
+                            <BlogView
+                                blog={blog}
+                                handleLike={handleLike}
+                                handleDelete={handleDelete}
+                                user={user}
+                            />
+                        }
+                    ></Route>
+                </Routes>
+            </Container>
         </div>
     )
 }

@@ -1,3 +1,4 @@
+import { Button, InputLabel, TextField } from '@mui/material'
 import { useState } from 'react'
 
 const CreateForm = ({ handleNewBlog }) => {
@@ -30,35 +31,38 @@ const CreateForm = ({ handleNewBlog }) => {
             <h2>create new</h2>
             <form onSubmit={handleSubmit}>
                 <div>
-                    title:
-                    <input
+                    <InputLabel htmlFor='title-input'>Title</InputLabel>
+                    <TextField
                         value={title}
-                        name='Title'
+                        name='title'
                         onChange={({ target }) => setTitle(target.value)}
                         id='title-input'
+                        variant='standard'
                     />
                 </div>
                 <div>
-                    author:
-                    <input
+                    <InputLabel htmlFor='author-input'>Author</InputLabel>
+                    <TextField
                         value={author}
-                        name='Author'
+                        name='author'
                         onChange={({ target }) => setAuthor(target.value)}
                         id='author-input'
+                        variant='standard'
                     />
                 </div>
                 <div>
-                    url:
-                    <input
+                    <InputLabel htmlFor='url-input'>URL</InputLabel>
+                    <TextField
                         value={url}
-                        name='Url'
+                        name='url'
                         onChange={({ target }) => setUrl(target.value)}
                         id='url-input'
+                        variant='standard'
                     />
                 </div>
-                <button type='submit' id='createButton'>
-                    create
-                </button>
+                <Button type='submit' variant='text' color='primary'>
+                    Create
+                </Button>
             </form>
         </div>
     )
