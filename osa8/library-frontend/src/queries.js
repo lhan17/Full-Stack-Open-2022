@@ -27,9 +27,9 @@ export const ALL_BOOKS = gql`
 export const ADD_BOOK = gql`
     mutation Mutation(
         $title: String!
-        $author: String
+        $author: String!
         $published: Int!
-        $genres: [String]
+        $genres: [String!]!
     ) {
         addBook(
             title: $title
@@ -38,10 +38,8 @@ export const ADD_BOOK = gql`
             genres: $genres
         ) {
             title
-            author
             published
             genres
-            id
         }
     }
 `
@@ -67,6 +65,27 @@ export const FAVORITE = gql`
     query Query {
         me {
             favoriteGenre
+        }
+    }
+`
+
+export const FILTEREDBOOKS = gql`
+    query Query($genre: String) {
+        allBooks(genre: $genre) {
+            title
+            published
+            author {
+                name
+            }
+        }
+    }
+`
+export const BOOK_ADDED = gql`
+    subscription Subscription {
+        bookAdded {
+            title
+            published
+            genres
         }
     }
 `

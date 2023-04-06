@@ -1,17 +1,23 @@
-import { useQuery } from '@apollo/client'
-import { FAVORITE } from '../queries'
+import { useQuery, useLazyQuery } from '@apollo/client'
+import { FAVORITE, FILTEREDBOOKS } from '../queries'
 
 const Recommend = (props) => {
     const favoriteGenre = useQuery(FAVORITE)
-    if (props.books.loading || favoriteGenre.loading) {
+
+    const [getFilteredBooks, { loading: filteredLoading, data: filteredData }] =
+        useLazyQuery(FILTEREDBOOKS)
+
+    if (favoriteGenre.loading) {
         return <div>loading...</div>
     }
 
-    const books = props.books.data.allBooks
+    const genre = favoriteGenre.data.me.favoriteGenre
 
-    const filteredBooks = books.filter((element) =>
-        element.genres.includes(favoriteGenre.data.me.favoriteGenre)
-    )
+    if (!filteredLoading && !filteredData) {
+        getFilteredBooks({
+            variables: { genre },
+        })
+    }
 
     return (
         <div>
@@ -23,7 +29,7 @@ const Recommend = (props) => {
                         <th>author</th>
                         <th>published</th>
                     </tr>
-                    {filteredBooks.map((a) => (
+                    {filteredData?.allBooks.map((a) => (
                         <tr key={a.title}>
                             <td>{a.title}</td>
                             <td>{a.author.name}</td>

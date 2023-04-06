@@ -2,10 +2,10 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Login from './components/Login'
-import { useApolloClient, useQuery } from '@apollo/client'
-import { ALL_AUTHORS, ALL_BOOKS } from './queries'
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED } from './queries'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Recommend from './components/Recommend'
 
 const App = () => {
@@ -14,6 +14,16 @@ const App = () => {
     const navigate = useNavigate()
     const [token, setToken] = useState(null)
     const client = useApolloClient()
+
+    useEffect(() => {
+        setToken(window.localStorage.getItem('phonenumbers-user-token'))
+    }, [])
+
+    useSubscription(BOOK_ADDED, {
+        onData: ({ data }) => {
+            window.alert(`A book named ${data.data.bookAdded.title} added`)
+        },
+    })
 
     if (authors.loading) {
         return <div>loading...</div>
